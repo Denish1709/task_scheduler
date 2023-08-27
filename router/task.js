@@ -9,13 +9,13 @@ router.get("/", async (req, res) => {
     let filter = {};
     if (status || priority || category) {
       if (status) {
-        filter.status = { $in: status.split("/") };
+        filter.status = status;
       }
       if (priority) {
-        filter.priority = { $in: priority.split("/") };
+        filter.priority = priority;
       }
       if (category) {
-        filter.category = { $in: category.split("/") };
+        filter.category = category;
       }
     }
     res.status(200).send(await Task.find(filter));
@@ -55,9 +55,28 @@ router.put("/:id", async (req, res) => {
   try {
     const task_id = req.params.id;
     const updateTask = await Task.findByIdAndUpdate(task_id, req.body, {
+      runValidators: true,
       new: true,
     });
     res.status(200).send(updateTask);
+  } catch (error) {
+    res.status(400).send({ message: error._message });
+  }
+});
+
+router.put("/:id/completed", async (req, res) => {
+  try {
+    const task_id = req.params.id;
+    const completedTask = await Task.findByIdAndUpdate(
+      task_id,
+      {
+        completed: true,
+      },
+      {
+        new: true,
+      }
+    );
+    res.status(200).send(completedTask);
   } catch (error) {
     res.status(400).send({ message: error._message });
   }
